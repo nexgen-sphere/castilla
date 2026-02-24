@@ -1,0 +1,1695 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Heart, ShoppingCart, Menu, X, Instagram, Facebook, Mail, MapPin, Phone } from 'lucide-react';
+
+// ==========================================================================
+// 1. DATA & INITIAL STATE
+// ==========================================================================
+const initialProducts = [
+  { id: 1, name: "Rose Gold Essence", category: "Scented Candles", price: 2500, originalPrice: null, image: "https://images.unsplash.com/photo-1602928321679-560bb453f190?w=600&q=80", description: "Notes of rose, amber, and sandalwood.", scentStory: "A luxurious journey beginning with the delicate bloom of fresh roses, settling into a warm, intoxicating embrace of golden amber and rich sandalwood. Perfect for intimate evenings.", topNotes: "Damask Rose, Bergamot", heartNotes: "Golden Amber, Patchouli", baseNotes: "Sandalwood, Vanilla Bean", burnTime: 45, weight: 250, badge: "Bestseller" },
+  { id: 2, name: "Amber Dreams", category: "Scented Candles", price: 2800, originalPrice: null, image: "https://images.unsplash.com/photo-1605814582967-854746618c66?w=600&q=80", description: "Rich amber, vanilla, and warm spices.", scentStory: "Like a cozy cashmere blanket on a winter evening. This deeply comforting fragrance fills the room with rich, creamy vanilla and exotic spices grounded in sultry amber.", topNotes: "Cardamom, Cinnamon", heartNotes: "Vanilla Orchid, Tonka Bean", baseNotes: "Deep Amber, Musk", burnTime: 50, weight: 300, badge: null },
+  { id: 3, name: "Lavender Serenity", category: "Scented Candles", price: 2300, originalPrice: 2800, image: "https://images.unsplash.com/photo-1596433809252-260c274591f4?w=600&q=80", description: "Calming lavender, eucalyptus, and cedarwood.", scentStory: "Transform your space into a tranquil spa. Fresh, herbaceous lavender intertwines with crisp eucalyptus, finishing with a grounding, earthy cedarwood base.", topNotes: "Eucalyptus, Lemon Zest", heartNotes: "French Lavender, Clary Sage", baseNotes: "Cedarwood, White Musk", burnTime: 40, weight: 220, badge: "Sale" },
+  { id: 4, name: "Jasmine Bliss Bouquet", category: "Candle Bouquets", price: 4500, originalPrice: null, image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600&q=80", description: "Handcrafted floral candle arrangement.", scentStory: "A stunning visual and olfactory masterpiece. Hand-molded wax flowers emit the heady, romantic scent of night-blooming jasmine and neroli. Almost too beautiful to burn.", topNotes: "Neroli, Dewy Greens", heartNotes: "Night-Blooming Jasmine, Tuberose", baseNotes: "Powdery Musk", burnTime: 60, weight: 450, badge: "New" },
+  { id: 5, name: "Rose & Peony Arrangement", category: "Candle Bouquets", price: 5000, originalPrice: null, image: "https://images.unsplash.com/photo-1559827014-a9316bb354c2?w=600&q=80", description: "Elegant arrangement of wax roses and peonies.", scentStory: "The ultimate centerpiece. Delicate wax petals unfold to release a lush, romantic bouquet of classic rose and lush peony, resting softly on a bed of white musk.", topNotes: "Pink Grapefruit, Freesia", heartNotes: "Damask Rose, Peony", baseNotes: "White Musk, Blonde Woods", burnTime: 70, weight: 500, badge: null },
+  { id: 6, name: "Minimalist Concrete Tray", category: "Concrete Trays", price: 1800, originalPrice: null, image: "https://images.unsplash.com/photo-1615876234886-fd1a8ebc4e5c?w=600&q=80", description: "Hand-poured oval concrete tray.", scentStory: "Artisan-crafted in our studio, these trays are the perfect resting place for your favorite pillar candles, jewelry, or keys. Sealed to protect against water and stains.", topNotes: "N/A", heartNotes: "N/A", baseNotes: "N/A", burnTime: null, weight: 350, badge: null },
+  { id: 7, name: "Luxury Marble Tray", category: "Concrete Trays", price: 2200, originalPrice: null, image: "https://images.unsplash.com/photo-1583847268964-b28e5e8e8c89?w=600&q=80", description: "Concrete tray with exquisite marble effect.", scentStory: "Each piece features a unique, mesmerizing marble swirl, hand-poured to ensure no two are exactly alike. Elevated elegance for your vanity or coffee table.", topNotes: "N/A", heartNotes: "N/A", baseNotes: "N/A", burnTime: null, weight: 400, badge: "New" },
+  { id: 8, name: "Chocolate Delight Cake", category: "Customized Cakes", price: 3500, originalPrice: null, image: "https://images.unsplash.com/photo-1578985545062-69928b1ea381?w=600&q=80", description: "Rich, decadent, handmade chocolate cake.", scentStory: "Our culinary extension. Decadent, moist layers of dark chocolate sponge enrobed in a silky Belgian chocolate ganache. Perfect for pairing with our candle gifts.", topNotes: "N/A", heartNotes: "N/A", baseNotes: "N/A", burnTime: null, weight: 1000, badge: null },
+  { id: 9, name: "Cloud Bubble Candle", category: "Bubble Candles", price: 1500, originalPrice: null, image: "https://images.unsplash.com/photo-1608181114410-db2ecce5c754?w=600&q=80", description: "Aesthetic pastel bubble cube candle.", scentStory: "The internet's favorite shape, refined. A sculptural accent piece that emits a subtle, sweet cotton scent even when unlit. Poured with sustainable soy wax.", topNotes: "Fresh Air, Lily", heartNotes: "Cotton Flower", baseNotes: "Soft Musk", burnTime: 15, weight: 150, badge: "New" },
+  { id: 10, name: "Birthday Celebration Pack", category: "Pre-Made Gift Packs", price: 5500, originalPrice: null, image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80", description: "The perfect ready-to-gift birthday bundle.", scentStory: "Everything needed for a perfect celebration. Includes a signature 'Vanilla Frosting' candle, a minimalist concrete tray, and a personalized greeting card in a luxury box.", topNotes: "N/A", heartNotes: "N/A", baseNotes: "N/A", burnTime: null, weight: 1200, badge: "Bestseller" },
+  { id: 11, name: "Wedding Bliss Pack", category: "Pre-Made Gift Packs", price: 7500, originalPrice: null, image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80", description: "Elegant gift for newlyweds.", scentStory: "A sophisticated offering for the happy couple. Features two romantic pillar candles, a marble-effect tray, and our signature Rose Gold Essence jar candle.", topNotes: "N/A", heartNotes: "N/A", baseNotes: "N/A", burnTime: null, weight: 1500, badge: null },
+  { id: 12, name: "Relaxation Spa Pack", category: "Pre-Made Gift Packs", price: 4500, originalPrice: 5500, image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&q=80", description: "Unwind with our spa-themed essentials.", scentStory: "The ultimate self-care package. Features our Lavender Serenity candle, artisan bath salts, and a delicate bubble candle, all nestled in our premium gift packaging.", topNotes: "N/A", heartNotes: "N/A", baseNotes: "N/A", burnTime: null, weight: 1000, badge: "Sale" },
+  { id: 13, name: "Create Your Own Pack", category: "Custom Gift Packs", price: 0, originalPrice: null, image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=600&q=80", description: "Build a bespoke gift from scratch.", scentStory: "You are the curator. Select from our range of artisanal candles, beautifully cast trays, and exquisite bouquets to assemble a deeply personal, one-of-a-kind gift.", topNotes: "N/A", heartNotes: "N/A", baseNotes: "N/A", burnTime: null, weight: null, badge: "✨" }
+];
+
+const initialCategories = [
+  { name: 'Scented Candles', icon: '🕯️' },
+  { name: 'Candle Bouquets', icon: '💐' },
+  { name: 'Concrete Trays', icon: '📐' },
+  { name: 'Customized Cakes', icon: '🎂' },
+  { name: 'Bubble Candles', icon: '🫧' },
+  { name: 'Pre-Made Gift Packs', icon: '🎁' },
+  { name: 'Custom Gift Packs', icon: '✨' }
+];
+
+// Builder Options
+const BUILDER_ITEMS = [
+  { id: 'candle', name: 'Signature Candle', price: 2500, icon: '🕯️' },
+  { id: 'tray', name: 'Concrete Tray', price: 1800, icon: '📐' },
+  { id: 'bouquet', name: 'Candle Bouquet', price: 4500, icon: '💐' },
+  { id: 'bubble', name: 'Bubble Candle', price: 1500, icon: '🫧' },
+];
+
+const WRAP_OPTIONS = [
+  { id: 'standard', name: 'Standard Rose-Gold Box', price: 500, desc: 'Our classic signature packaging.' },
+  { id: 'velvet', name: 'Premium Velvet Pouch', price: 1000, desc: 'Luxurious soft-touch feel.' },
+  { id: 'luxury', name: 'Luxury Wooden Box', price: 1500, desc: 'The ultimate unboxing experience.' },
+];
+
+const formatMoney = (amount) => `PKR ${amount.toLocaleString()}`;
+
+// ==========================================================================
+// 2. MAIN APP COMPONENT
+// ==========================================================================
+export default function App() {
+  // Global App State
+  const [currentView, setCurrentView] = useState('home');
+  const [params, setParams] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Data State
+  const [products, setProducts] = useState(initialProducts);
+  const [categories, setCategories] = useState(initialCategories);
+  const [cart, setCart] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [orders, setOrders] = useState([]);
+  
+  // App UI State
+  const [shopFilter, setShopFilter] = useState('All');
+  const [shopSort, setShopSort] = useState('Default');
+  const [discountCode, setDiscountCode] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [exitPopupShown, setExitPopupShown] = useState(false);
+
+  // Admin State
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
+  const [adminTab, setAdminTab] = useState('dashboard');
+
+  // Modals State
+  const [modals, setModals] = useState({
+    search: false,
+    quickView: null,
+    wishlist: false,
+    order: null,
+    adminProduct: null,
+    isAdminProductOpen: false,
+    exitIntent: false
+  });
+
+  // Handle Hash Routing
+  useEffect(() => {
+    const handleHashChange = () => {
+      let hash = window.location.hash.replace('#', '') || 'home';
+      let parsedParams = {};
+      
+      if(hash.includes('?')) {
+        const [path, qs] = hash.split('?');
+        hash = path;
+        const urlParams = new URLSearchParams(qs);
+        for(let [k, v] of urlParams.entries()) {
+          parsedParams[k] = v;
+        }
+      }
+
+      if (hash === 'shop' && parsedParams.category) {
+        setShopFilter(parsedParams.category);
+      } else if (hash === 'shop' && !parsedParams.category) {
+        setShopFilter('All');
+      }
+
+      setCurrentView(hash);
+      setParams(parsedParams);
+      window.scrollTo(0, 0);
+      setIsMobileMenuOpen(false);
+      setModals(prev => ({ ...prev, search: false }));
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange(); // Init
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Loading Screen Effect
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Exit Intent
+  useEffect(() => {
+    const handleMouseLeave = (e) => {
+      if (e.clientY < 0 && !exitPopupShown) {
+        setExitPopupShown(true);
+        openModal('exitIntent');
+      }
+    };
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, [exitPopupShown]);
+
+  // Global Helpers
+  const showToast = (message, type = 'success') => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
+  const openModal = (modalName, data = true) => {
+    setModals(prev => ({ ...prev, [modalName]: data }));
+  };
+
+  const closeModal = (modalName) => {
+    setModals(prev => ({ ...prev, [modalName]: false }));
+  };
+
+  // Cart & Wishlist Logic
+  const toggleWishlist = (productId) => {
+    setWishlist(prev => {
+      if (prev.includes(productId)) {
+        showToast('Removed from wishlist');
+        return prev.filter(id => id !== productId);
+      } else {
+        showToast('Added to wishlist ❤️');
+        return [...prev, productId];
+      }
+    });
+  };
+
+  const addToCart = (product, quantity = 1, options = null) => {
+    setCart(prev => {
+      if (options) {
+        showToast('Custom Gift Pack added to cart!');
+        return [...prev, { ...product, cartId: Date.now() + Math.random(), quantity, options }];
+      }
+      
+      const existing = prev.find(i => i.id === product.id && !i.options);
+      showToast(`${product.name} added to cart!`);
+      if (existing) {
+        return prev.map(i => i.cartId === existing.cartId ? { ...i, quantity: i.quantity + quantity } : i);
+      }
+      return [...prev, { ...product, cartId: Date.now() + Math.random(), quantity }];
+    });
+  };
+
+  const updateCartQty = (cartId, delta) => {
+    setCart(prev => {
+      return prev.map(item => {
+        if (item.cartId === cartId) {
+          const newQty = item.quantity + delta;
+          if (newQty < 1) return null; // handled via filter below
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      }).filter(Boolean);
+    });
+  };
+
+  const removeFromCart = (cartId) => {
+    setCart(prev => prev.filter(item => item.cartId !== cartId));
+  };
+
+  const clearCart = () => setCart([]);
+
+  return (
+    <div className="font-sans antialiased text-[#2C2C2C] bg-[#FEFDFB] min-h-screen">
+      <CustomStyles />
+      
+      {isLoading && <LoadingScreen />}
+
+      <AnnouncementBar />
+      <Navbar 
+        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)} 
+        wishlistCount={wishlist.length}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        openSearch={() => openModal('search')}
+        openWishlist={() => openModal('wishlist')}
+      />
+
+      <main className="min-h-[calc(100vh-300px)] pt-[100px]">
+        {currentView === 'home' && <HomeView products={products} categories={categories} toggleWishlist={toggleWishlist} wishlist={wishlist} openQuickView={(id) => openModal('quickView', id)} />}
+        {currentView === 'shop' && <ShopView products={products} categories={categories} shopFilter={shopFilter} setShopFilter={setShopFilter} shopSort={shopSort} setShopSort={setShopSort} toggleWishlist={toggleWishlist} wishlist={wishlist} openQuickView={(id) => openModal('quickView', id)} />}
+        {currentView.startsWith('product-') && <ProductDetailView productId={parseInt(currentView.split('-')[1])} products={products} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} />}
+        {currentView === 'checkout' && <CartCheckoutView cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} discountCode={discountCode} setDiscountCode={setDiscountCode} showToast={showToast} clearCart={clearCart} setOrders={setOrders} />}
+        {currentView === 'admin' && <AdminView products={products} setProducts={setProducts} categories={categories} setCategories={setCategories} orders={orders} setOrders={setOrders} adminLoggedIn={adminLoggedIn} setAdminLoggedIn={setAdminLoggedIn} adminTab={adminTab} setAdminTab={setAdminTab} showToast={showToast} openOrderModal={(id) => openModal('order', id)} openAdminProductModal={(p) => openModal('adminProduct', p)} closeAdminProductModal={() => closeModal('adminProduct')} isProductModalOpen={modals.adminProduct !== false} />}
+        {currentView === 'shipping' && <ShippingView />}
+        {currentView === 'returns' && <ReturnsView />}
+        {currentView === 'candle-care' && <CandleCareView />}
+        {currentView === 'faqs' && <FAQsView />}
+      </main>
+
+      <Footer />
+
+      {/* Overlays & Modals */}
+      <SearchOverlay isOpen={modals.search} close={() => closeModal('search')} products={products} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      
+      {modals.quickView && <QuickViewModal product={products.find(p => p.id === modals.quickView)} close={() => closeModal('quickView')} addToCart={addToCart} />}
+      
+      {modals.wishlist && <WishlistModal wishlistIds={wishlist} products={products} close={() => closeModal('wishlist')} toggleWishlist={toggleWishlist} addToCart={addToCart} />}
+      
+      {modals.order && <OrderModal order={orders.find(o => o.id === modals.order)} close={() => closeModal('order')} setOrders={setOrders} showToast={showToast} />}
+      
+      {modals.exitIntent && <ExitIntentModal close={() => closeModal('exitIntent')} showToast={showToast} />}
+      
+      {/* Toasts */}
+      <div className="fixed top-[100px] right-8 z-[10005] flex flex-col gap-4">
+        {toasts.map(toast => (
+          <div key={toast.id} className="bg-white p-4 rounded-xl border-l-4 border-[#C9A57B] shadow-2xl min-w-[300px] flex items-center gap-4 animate-slide-in">
+            <span className="text-2xl">{toast.type === 'error' ? '❌' : '✨'}</span>
+            <div>
+              <strong className="block font-playfair text-[#C9A57B]">{toast.type === 'error' ? 'Oops!' : 'Success'}</strong>
+              <span className="text-sm">{toast.message}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  );
+}
+
+// ==========================================================================
+// 3. COMPONENTS
+// ==========================================================================
+
+const AnnouncementBar = () => (
+  <div className="fixed top-0 left-0 w-full bg-gradient-to-r from-[#8B6F47] to-[#C9A57B] text-white text-center py-2 text-sm z-[1001] font-medium shadow-sm">
+    ✨ Free Shipping on Orders Over PKR 5,000 | New Arrivals Just Landed! <a href="#shop" className="underline ml-2 hover:text-[#F5EBE0]">Shop Now</a>
+  </div>
+);
+
+const Navbar = ({ cartCount, wishlistCount, isMobileMenuOpen, setIsMobileMenuOpen, openSearch, openWishlist }) => (
+  <nav className="fixed top-[36px] left-0 w-full bg-white/90 backdrop-blur-md border-b border-[#C9A57B]/20 shadow-sm z-[1000] h-[70px] flex items-center transition-all">
+    <div className="w-full max-w-[1280px] mx-auto px-8 flex justify-between items-center">
+      <a href="#home" className="font-playfair text-2xl text-[#C9A57B] font-bold tracking-wider flex items-center gap-2">
+        <svg className="w-8 h-8 fill-[#C9A57B]" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6C8.69,6 6,8.69 6,12C6,15.31 8.69,18 12,18C15.31,18 18,15.31 18,12C18,8.69 15.31,6 12,6M12,8C14.21,8 16,9.79 16,12C16,14.21 14.21,16 12,16C9.79,16 8,14.21 8,12C8,9.79 9.79,8 12,8Z"/></svg>
+        CASTILLA
+      </a>
+      
+      {/* Desktop Links */}
+      <ul className="hidden md:flex gap-8 items-center">
+        <li><a href="#home" className="nav-link font-medium relative hover:text-[#C9A57B] transition-colors">Home</a></li>
+        <li><a href="#shop" className="nav-link font-medium relative hover:text-[#C9A57B] transition-colors">Shop</a></li>
+        <li><a href="#shop?category=Pre-Made Gift Packs" className="nav-link font-medium relative hover:text-[#C9A57B] transition-colors">Gift Packs</a></li>
+      </ul>
+
+      {/* Icons */}
+      <div className="flex gap-6 items-center">
+        <button onClick={openSearch} className="relative hover:scale-110 hover:text-[#C9A57B] transition-transform"><Search size={20}/></button>
+        <button onClick={openWishlist} className="relative hover:scale-110 hover:text-[#C9A57B] transition-transform">
+          <Heart size={20}/>
+          <span className="absolute -top-2 -right-2 bg-[#C9A57B] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold border border-white">{wishlistCount}</span>
+        </button>
+        <a href="#checkout" className="relative hover:scale-110 hover:text-[#C9A57B] transition-transform">
+          <ShoppingCart size={20}/>
+          <span className="absolute -top-2 -right-2 bg-[#C9A57B] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold border border-white">{cartCount}</span>
+        </a>
+        <button className="md:hidden text-[#C9A57B]" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {isMobileMenuOpen ? <X size={28}/> : <Menu size={28}/>}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      <div className={`fixed top-0 right-0 w-[250px] h-screen bg-white shadow-[-5px_0_15px_rgba(0,0,0,0.05)] flex flex-col pt-24 px-8 gap-6 transition-transform duration-300 z-[-1] md:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <a href="#home" className="text-lg font-medium">Home</a>
+        <a href="#shop" className="text-lg font-medium">Shop</a>
+        <a href="#shop?category=Pre-Made Gift Packs" className="text-lg font-medium">Gift Packs</a>
+      </div>
+    </div>
+  </nav>
+);
+
+const SearchOverlay = ({ isOpen, close, products, searchQuery, setSearchQuery }) => {
+  if (!isOpen) return null;
+
+  const matches = searchQuery.length > 1 
+    ? products.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 5)
+    : [];
+
+  return (
+    <div className="fixed inset-0 bg-white/98 z-[9999] flex flex-col items-center pt-[15vh] px-4 animate-fade-in">
+      <div className="w-full max-w-[700px] relative">
+        <button onClick={close} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"><X size={28}/></button>
+        <input 
+          type="text" 
+          autoFocus 
+          placeholder="Search for candles, trays, gifts..." 
+          className="w-full py-6 pr-16 pl-8 text-2xl border-2 border-[#C9A57B] rounded-full shadow-lg outline-none bg-transparent"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        
+        {searchQuery.length > 1 && (
+          <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden animate-slide-up">
+            {matches.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">No products found.</div>
+            ) : (
+              matches.map(p => (
+                <a 
+                  key={p.id} 
+                  href={`#product-${p.id}`} 
+                  onClick={close}
+                  className="flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  <img src={p.image} alt={p.name} className="w-16 h-16 rounded-lg object-cover mr-4" />
+                  <div>
+                    <div className="font-semibold">{p.name}</div>
+                    <div className="text-sm text-gray-500">{p.category}</div>
+                    <div className="text-[#C9A57B] font-semibold mt-1">{formatMoney(p.price)}</div>
+                  </div>
+                </a>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const LoadingScreen = () => (
+  <div className="fixed inset-0 bg-[#FEFDFB] z-[10000] flex flex-col items-center justify-center animate-screen-exit pointer-events-none">
+    <div className="absolute w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(201,165,123,0.15)_0%,rgba(254,253,251,0)_70%)] animate-pulse-glow" />
+    <div className="font-playfair text-5xl md:text-7xl uppercase tracking-[0.15em] text-[#2C2C2C] flex relative z-10 animate-text-glow">
+      {['C','A','S','T','I','L','L','A'].map((l, i) => (
+        <span key={i} className="animate-letter-reveal opacity-0 translate-y-8" style={{animationDelay: `${i * 0.1}s`}}>{l}</span>
+      ))}
+    </div>
+    <div className="mt-4 text-[#C9A57B] uppercase tracking-widest text-sm font-medium opacity-0 animate-fade-in relative z-10" style={{animationDelay: '1.2s'}}>Handcrafted with love</div>
+    <div className="flex gap-2 mt-8 relative z-10">
+      {[0,1,2].map(i => <div key={i} className="w-3 h-3 bg-[#C9A57B] rounded-full opacity-30 animate-dot-pulse" style={{animationDelay: `${i * 0.2}s`}} />)}
+    </div>
+  </div>
+);
+
+const Footer = () => (
+  <footer className="bg-[#2C2C2C] text-white py-16 px-8 mt-16">
+    <div className="max-w-[1280px] mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <div>
+          <h3 className="font-playfair text-[#C9A57B] text-2xl mb-6">CASTILLA</h3>
+          <p className="text-white/70 text-sm leading-relaxed mb-6">
+            Handcrafted with love in Karachi, Pakistan. Elevating your space with luxury artisan candles, concrete trays, and bespoke gifts.
+          </p>
+          <div className="flex gap-3">
+            <a href="https://instagram.com/castilla.pk" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#C9A57B] transition-colors"><Instagram size={18}/></a>
+            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#C9A57B] transition-colors"><Facebook size={18}/></a>
+            <a href="mailto:hello@castilla.pk" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#C9A57B] transition-colors"><Mail size={18}/></a>
+          </div>
+        </div>
+        <div>
+          <h4 className="font-playfair text-[#C9A57B] text-xl mb-6">Quick Links</h4>
+          <ul className="space-y-3 text-white/80">
+            <li><a href="#home" className="hover:text-[#C9A57B] transition-colors">Home</a></li>
+            <li><a href="#shop" className="hover:text-[#C9A57B] transition-colors">Shop All</a></li>
+            <li><a href="#shop?category=Custom Gift Packs" className="hover:text-[#C9A57B] transition-colors">Build a Gift</a></li>
+            <li><a href="#checkout" className="hover:text-[#C9A57B] transition-colors">Your Cart</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-playfair text-[#C9A57B] text-xl mb-6">Customer Care</h4>
+          <ul className="space-y-3 text-white/80">
+            <li><a href="#shipping" className="hover:text-[#C9A57B] transition-colors">Shipping Policy</a></li>
+            <li><a href="#returns" className="hover:text-[#C9A57B] transition-colors">Returns & Exchanges</a></li>
+            <li><a href="#candle-care" className="hover:text-[#C9A57B] transition-colors">Candle Care Guide</a></li>
+            <li><a href="#faqs" className="hover:text-[#C9A57B] transition-colors">FAQs</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-playfair text-[#C9A57B] text-xl mb-6">Contact Us</h4>
+          <ul className="space-y-4 text-white/80">
+            <li className="flex items-center gap-3"><Phone size={16}/> +92 300 1234567</li>
+            <li className="flex items-center gap-3"><Mail size={16}/> hello@castilla.pk</li>
+            <li className="flex items-center gap-3"><MapPin size={16}/> Karachi, Pakistan</li>
+            <li className="mt-4"><span className="bg-[#C9A57B] text-white text-xs px-3 py-1 rounded-full font-bold">Mon-Sat: 10AM - 6PM</span></li>
+          </ul>
+        </div>
+      </div>
+      <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center text-white/50 text-sm">
+        <span>© 2026 Castilla. All rights reserved.</span>
+        <a href="#admin" className="hover:text-[#C9A57B] transition-colors mt-4 md:mt-0">Admin Login</a>
+      </div>
+    </div>
+  </footer>
+);
+
+// --- Home Components ---
+const Hero = () => {
+  const [activeSlide, setActiveSlide] = useState(0);
+  
+  const slides = [
+    { bg: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=1600", tag: "New Collection", title: "Illuminate Your Space", desc: "Discover our artisan-crafted candles, poured with intention and love.", link: "#shop", btn: "Shop New Arrivals" },
+    { bg: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1600", tag: "Bespoke Gifts", title: "Thoughtfully Curated", desc: "Create personalized gift packs to celebrate life's special moments.", link: "#shop?category=Custom Gift Packs", btn: "Build Your Gift" },
+    { bg: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=1600", tag: "Limited Edition", title: "Candle Bouquets", desc: "Stunning arrangements combining fragrance with floral elegance.", link: "#shop?category=Candle Bouquets", btn: "Explore Bouquets" },
+    { bg: "https://images.unsplash.com/photo-1615876234886-fd1a8ebc4e5c?w=1600", tag: "Artisan Details", title: "Minimalist Trays", desc: "Hand-cast concrete pieces to elevate your vanity and home decor.", link: "#shop?category=Concrete Trays", btn: "Shop Decor" },
+    { bg: "https://images.unsplash.com/photo-1605814582967-854746618c66?w=1600", tag: "Signature Scents", title: "Sensory Escapes", desc: "Immerse yourself in rich ambers, calming lavenders, and sweet vanillas.", link: "#shop?category=Scented Candles", btn: "Discover Scents" }
+  ];
+
+  useEffect(() => {
+    const int = setInterval(() => setActiveSlide(s => (s + 1) % slides.length), 5000);
+    return () => clearInterval(int);
+  }, [slides.length]);
+
+  return (
+    <div className="relative h-[85vh] -mt-[100px] overflow-hidden bg-black">
+      {/* Magic Orbs */}
+      <div className="absolute inset-0 z-[3] pointer-events-none">
+        {[15, 35, 55, 75, 90].map((left, i) => (
+          <div key={i} className="absolute bottom-[-50px] w-3 h-3 bg-[radial-gradient(circle,#FFF2D1_0%,#C9A57B_40%,transparent_100%)] rounded-full opacity-0 blur-[2px] animate-float-orb" style={{left: `${left}%`, animationDelay: `${i*1.2}s`, animationDuration: `${4+i*0.5}s`}} />
+        ))}
+      </div>
+
+      {slides.map((s, i) => (
+        <div key={i} className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-1000 ${i === activeSlide ? 'opacity-100 z-[2]' : 'opacity-0 z-[1]'}`}>
+          <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[6000ms] scale-110" style={{backgroundImage: `url(${s.bg})`, transform: i === activeSlide ? 'scale(1)' : 'scale(1.1)'}} />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#2C2C2C]/30 to-[#8B6F47]/50 animate-candle-flicker" />
+          
+          <div className={`relative z-[4] text-white max-w-[800px] px-8 transition-transform duration-1000 ${i === activeSlide ? 'translate-y-0' : 'translate-y-8'}`}>
+            <div className="uppercase tracking-[0.1em] text-sm font-medium text-[#F5EBE0] mb-4">{s.tag}</div>
+            <h1 className="font-playfair text-5xl md:text-7xl mb-6 drop-shadow-2xl">{s.title}</h1>
+            <p className="text-xl text-[#F5EBE0] font-light mb-10 max-w-[600px] mx-auto">{s.desc}</p>
+            <a href={s.link} className="btn-primary inline-flex">{s.btn}</a>
+          </div>
+        </div>
+      ))}
+
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-[5]">
+        {slides.map((_, i) => (
+          <button key={i} onClick={() => setActiveSlide(i)} className={`h-3 rounded-full transition-all duration-300 ${i === activeSlide ? 'w-8 bg-white' : 'w-3 bg-white/40'}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ProductCard = ({ product, inWishlist, toggleWishlist, openQuickView }) => {
+  const priceHtml = product.originalPrice 
+    ? <><span className="text-xl font-bold text-[#C9A57B]">{formatMoney(product.price)}</span><span className="text-sm text-gray-400 line-through ml-2">{formatMoney(product.originalPrice)}</span></>
+    : <span className="text-xl font-bold text-[#C9A57B]">{product.price === 0 ? 'Dynamic' : formatMoney(product.price)}</span>;
+
+  return (
+    <div className="bg-white rounded-2xl border border-[#C9A57B]/10 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-[#C9A57B] group relative overflow-visible flex flex-col h-full">
+      <button onClick={(e) => toggleWishlist(product.id, e)} className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-110 transition-transform">
+        <Heart size={18} fill={inWishlist ? "#E74C3C" : "none"} color={inWishlist ? "#E74C3C" : "#2C2C2C"} />
+      </button>
+      
+      {product.badge && (
+        <div className={`absolute top-4 right-4 z-10 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white rounded-full ${product.badge === 'New' ? 'bg-[#7FA99B]' : product.badge === 'Sale' ? 'bg-[#E74C3C]' : 'bg-[#C9A57B]'}`}>
+          {product.badge}
+        </div>
+      )}
+
+      <div className="relative h-[280px] overflow-hidden rounded-t-2xl">
+        <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        <button onClick={(e) => openQuickView(product.id, e)} className="absolute bottom-[-50px] left-1/2 -translate-x-1/2 bg-white text-[#C9A57B] border-2 border-[#C9A57B] px-6 py-2 rounded-full font-bold opacity-0 transition-all duration-300 group-hover:bottom-6 group-hover:opacity-100 hover:bg-[#C9A57B] hover:text-white">
+          Quick View
+        </button>
+      </div>
+
+      <div className="p-6 flex flex-col flex-grow">
+        <div className="text-xs text-[#C9A57B] uppercase tracking-widest mb-2">{product.category}</div>
+        <h3 className="text-lg font-bold mb-2">{product.name}</h3>
+        <p className="text-sm italic text-gray-500 mb-4 line-clamp-2 flex-grow">{product.scentStory}</p>
+        <div className="flex items-baseline mb-4">{priceHtml}</div>
+        <a href={`#product-${product.id}`} className="btn-primary w-full text-center mt-auto">
+          {product.price === 0 ? 'Build Pack' : 'View Details'}
+        </a>
+      </div>
+    </div>
+  );
+};
+
+// --- Views ---
+const HomeView = ({ products, categories, toggleWishlist, wishlist, openQuickView }) => (
+  <div className="animate-fade-in-view pb-24">
+    <Hero />
+    
+    <div className="bg-[#F5EBE0] py-10">
+      <div className="max-w-[1280px] mx-auto px-8 flex flex-wrap justify-between gap-8 text-center md:text-left">
+        <div className="flex flex-col md:flex-row items-center gap-4 flex-1 min-w-[200px]"><span className="text-3xl">🚚</span><div><h4 className="font-bold text-sm">Free Shipping</h4><p className="text-xs text-gray-500">Orders over PKR 5,000</p></div></div>
+        <div className="flex flex-col md:flex-row items-center gap-4 flex-1 min-w-[200px]"><span className="text-3xl">✨</span><div><h4 className="font-bold text-sm">Handcrafted</h4><p className="text-xs text-gray-500">100% artisan-made in PK</p></div></div>
+        <div className="flex flex-col md:flex-row items-center gap-4 flex-1 min-w-[200px]"><span className="text-3xl">🎁</span><div><h4 className="font-bold text-sm">Gift Wrapping</h4><p className="text-xs text-gray-500">Complimentary on request</p></div></div>
+        <div className="flex flex-col md:flex-row items-center gap-4 flex-1 min-w-[200px]"><span className="text-3xl">💝</span><div><h4 className="font-bold text-sm">Satisfaction</h4><p className="text-xs text-gray-500">Premium quality guaranteed</p></div></div>
+      </div>
+    </div>
+
+    <div className="max-w-[1280px] mx-auto px-8 py-24">
+      <h2 className="font-playfair text-4xl text-center mb-12">Top Sellers</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        {products.slice(0, 3).map(p => <ProductCard key={p.id} product={p} inWishlist={wishlist.includes(p.id)} toggleWishlist={toggleWishlist} openQuickView={openQuickView} />)}
+      </div>
+      <div className="text-center mt-12">
+        <a href="#shop" className="btn-secondary">View Entire Collection</a>
+      </div>
+    </div>
+
+    <div className="bg-[#F9F7F4] py-24">
+      <div className="max-w-[1280px] mx-auto px-8">
+        <h2 className="font-playfair text-4xl text-center mb-12">Shop By Category</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {categories.map(c => (
+            <a key={c.name} href={`#shop?category=${c.name}`} className="bg-white rounded-2xl p-8 text-center hover:-translate-y-2 hover:shadow-lg hover:border-[#C9A57B] border border-transparent transition-all group">
+              <span className="text-5xl block mb-4 group-hover:scale-110 transition-transform">{c.icon}</span>
+              <div className="font-playfair text-lg font-bold mb-1">{c.name}</div>
+              <div className="text-xs text-gray-400 uppercase tracking-wider">Explore</div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div className="max-w-[1280px] mx-auto px-8 py-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <img src="https://images.unsplash.com/photo-1616137604593-e4d6cc16ea61?w=800" alt="Pouring candle" className="rounded-3xl shadow-2xl h-[500px] w-full object-cover" />
+        <div>
+          <h2 className="font-playfair text-4xl text-[#C9A57B] mb-6">Crafted with Passion</h2>
+          <p className="text-lg text-gray-600 leading-relaxed mb-6">
+            Born in Karachi, Castilla is a celebration of Pakistani artisanship. We believe that true luxury lies in the details. Every candle is hand-poured in small batches, every tray hand-cast, and every scent meticulously blended.
+          </p>
+          <p className="text-lg text-gray-600 leading-relaxed mb-10">
+            Using premium soy wax, fine fragrance oils, and lead-free wicks, we create pieces that not only illuminate but elevate your sanctuary.
+          </p>
+          <div className="grid grid-cols-3 gap-6">
+            <div><div className="text-3xl text-[#C9A57B] font-bold">100%</div><div className="text-xs uppercase tracking-widest text-gray-500 mt-2">Handmade</div></div>
+            <div><div className="text-3xl text-[#C9A57B] font-bold">500+</div><div className="text-xs uppercase tracking-widest text-gray-500 mt-2">Happy Clients</div></div>
+            <div><div className="text-3xl text-[#C9A57B] font-bold">50+</div><div className="text-xs uppercase tracking-widest text-gray-500 mt-2">Unique Pieces</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ShopView = ({ products, categories, shopFilter, setShopFilter, shopSort, setShopSort, toggleWishlist, wishlist, openQuickView }) => {
+  const filtered = useMemo(() => {
+    let f = shopFilter === 'All' ? [...products] : products.filter(p => p.category === shopFilter);
+    if(shopSort === 'Price: Low to High') f.sort((a,b) => a.price - b.price);
+    if(shopSort === 'Price: High to Low') f.sort((a,b) => b.price - a.price);
+    if(shopSort === 'Name: A-Z') f.sort((a,b) => a.name.localeCompare(b.name));
+    if(shopSort === 'Name: Z-A') f.sort((a,b) => b.name.localeCompare(a.name));
+    if(shopSort === 'Newest First') f.sort((a,b) => (b.badge==='New'?1:0) - (a.badge==='New'?1:0));
+    return f;
+  }, [products, shopFilter, shopSort]);
+
+  return (
+    <div className="max-w-[1280px] mx-auto px-8 animate-fade-in-view pb-24">
+      <a href="#home" className="text-gray-400 hover:text-[#C9A57B] mb-8 inline-block">&larr; Back to Home</a>
+      <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+        <h1 className="font-playfair text-5xl">Our Collection</h1>
+        <select className="border border-[#C9A57B] rounded-lg px-4 py-2 bg-white text-gray-700 outline-none focus:ring-2 focus:ring-[#C9A57B]/30" value={shopSort} onChange={(e) => setShopSort(e.target.value)}>
+          <option value="Default">Sort: Default</option>
+          <option value="Price: Low to High">Price: Low to High</option>
+          <option value="Price: High to Low">Price: High to Low</option>
+          <option value="Name: A-Z">Name: A-Z</option>
+          <option value="Newest First">Newest First</option>
+        </select>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mb-12">
+        {['All', ...categories.map(c=>c.name)].map(name => (
+          <button key={name} onClick={() => setShopFilter(name)} className={`px-6 py-2 rounded-full border border-[#C9A57B] transition-colors ${shopFilter === name ? 'bg-[#C9A57B] text-white' : 'bg-transparent text-gray-700 hover:bg-[#C9A57B] hover:text-white'}`}>
+            {name}
+          </button>
+        ))}
+      </div>
+
+      <div className="text-gray-500 mb-6">Showing {filtered.length} products</div>
+      
+      {filtered.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {filtered.map(p => <ProductCard key={p.id} product={p} inWishlist={wishlist.includes(p.id)} toggleWishlist={toggleWishlist} openQuickView={openQuickView} />)}
+        </div>
+      ) : (
+        <div className="text-center py-24 text-gray-400 text-xl">No products found in this category.</div>
+      )}
+    </div>
+  );
+};
+
+const ProductDetailView = ({ productId, products, addToCart, toggleWishlist, wishlist }) => {
+  const product = products.find(p => p.id === productId);
+  const [qty, setQty] = useState(1);
+  
+  // Custom Gift Builder State
+  const [selectedBuilderItems, setSelectedBuilderItems] = useState([]);
+  const [selectedWrap, setSelectedWrap] = useState('standard');
+  const [giftMessage, setGiftMessage] = useState('');
+
+  if(!product) return <div className="p-24 text-center">Product not found.</div>;
+
+  const inWishlist = wishlist.includes(product.id);
+
+  const toggleBuilderItem = (id) => {
+    setSelectedBuilderItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const calculateCustomTotal = () => {
+    let sum = 0;
+    selectedBuilderItems.forEach(id => {
+      const item = BUILDER_ITEMS.find(i => i.id === id);
+      if(item) sum += item.price;
+    });
+    const wrapOption = WRAP_OPTIONS.find(w => w.id === selectedWrap);
+    if(wrapOption) sum += wrapOption.price;
+    return sum;
+  };
+
+  const handleCustomAdd = () => {
+    const itemNames = selectedBuilderItems.map(id => BUILDER_ITEMS.find(i => i.id === id)?.name);
+    const wrapName = WRAP_OPTIONS.find(w => w.id === selectedWrap)?.name;
+    
+    addToCart(product, 1, { 
+      price: calculateCustomTotal(), 
+      desc: itemNames.length ? `${itemNames.join(', ')} | ${wrapName}` : `Empty ${wrapName}`, 
+      msg: giftMessage 
+    });
+  };
+
+  return (
+    <div className="max-w-[1280px] mx-auto px-8 animate-fade-in-view pb-24">
+      <a href="#shop" className="text-gray-400 hover:text-[#C9A57B] mb-8 inline-block">&larr; Back to Shop</a>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+        <img src={product.image} alt={product.name} className="w-full aspect-[4/5] object-cover rounded-3xl border border-[#C9A57B]/20 shadow-lg sticky top-[120px]" />
+        
+        <div>
+          <div className="text-[#C9A57B] uppercase tracking-widest text-sm font-bold mb-2">{product.category}</div>
+          <h1 className="font-playfair text-4xl lg:text-5xl mb-6">{product.name}</h1>
+          
+          <p className="text-lg text-gray-600 leading-relaxed italic border-l-4 border-[#C9A57B] pl-6 mb-8">{product.scentStory}</p>
+          
+          {product.topNotes !== 'N/A' && (
+            <div className="bg-[#F9F7F4] p-6 rounded-xl mb-8 space-y-2">
+              <div><strong className="text-[#C9A57B]">Top Notes:</strong> {product.topNotes}</div>
+              <div><strong className="text-[#C9A57B]">Heart Notes:</strong> {product.heartNotes}</div>
+              <div><strong className="text-[#C9A57B]">Base Notes:</strong> {product.baseNotes}</div>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-6 text-sm text-gray-500 mb-8">
+            {product.burnTime && <span>🕯️ Burn Time: ~{product.burnTime} hours</span>}
+            {product.weight && <span>📦 Net Weight: {product.weight}g</span>}
+            <span>🇵🇰 Handcrafted in Pakistan</span>
+          </div>
+
+          {product.category === 'Custom Gift Packs' ? (
+            <div className="border border-gray-200 rounded-2xl p-8 mb-8 bg-white shadow-sm">
+              <h3 className="font-playfair text-2xl mb-6 text-[#C9A57B]">1. Curate Your Box</h3>
+              <div className="grid grid-cols-2 gap-4 mb-10">
+                {BUILDER_ITEMS.map(item => (
+                  <div 
+                    key={item.id} 
+                    onClick={() => toggleBuilderItem(item.id)}
+                    className={`cursor-pointer rounded-xl p-4 flex flex-col items-center text-center transition-all border-2 ${selectedBuilderItems.includes(item.id) ? 'border-[#C9A57B] bg-[#C9A57B]/5' : 'border-gray-100 hover:border-[#C9A57B]/50'}`}
+                  >
+                    <span className="text-3xl mb-3">{item.icon}</span>
+                    <span className="font-semibold text-sm mb-1">{item.name}</span>
+                    <span className="text-[#C9A57B] text-sm font-medium">+{formatMoney(item.price)}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <h3 className="font-playfair text-2xl mb-6 text-[#C9A57B]">2. Select Presentation</h3>
+              <div className="space-y-3 mb-10">
+                {WRAP_OPTIONS.map(wrap => (
+                  <div 
+                    key={wrap.id}
+                    onClick={() => setSelectedWrap(wrap.id)}
+                    className={`cursor-pointer rounded-xl p-4 flex justify-between items-center transition-all border-2 ${selectedWrap === wrap.id ? 'border-[#C9A57B] bg-[#C9A57B]/5' : 'border-gray-100 hover:border-[#C9A57B]/50'}`}
+                  >
+                    <div>
+                      <div className="font-semibold">{wrap.name}</div>
+                      <div className="text-xs text-gray-500 mt-1">{wrap.desc}</div>
+                    </div>
+                    <div className="text-[#C9A57B] font-medium">+{formatMoney(wrap.price)}</div>
+                  </div>
+                ))}
+              </div>
+              
+              <h3 className="font-playfair text-2xl mb-6 text-[#C9A57B]">3. Personalize It</h3>
+              <textarea 
+                rows="3" 
+                placeholder="Write a heartfelt message (optional)..." 
+                className="input-field mb-8"
+                value={giftMessage} 
+                onChange={e=>setGiftMessage(e.target.value)} 
+              />
+              
+              <div className="pt-6 border-t-2 border-[#C9A57B]/20">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-gray-500 font-medium">Estimated Total</span>
+                  <span className="text-3xl font-bold text-[#C9A57B]">{formatMoney(calculateCustomTotal())}</span>
+                </div>
+                <button className="btn-primary w-full py-4 text-lg" onClick={handleCustomAdd}>Create & Add to Cart</button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-4 mb-8">
+                <span className="text-4xl font-bold text-[#C9A57B]">{formatMoney(product.price)}</span>
+                {product.originalPrice && <span className="text-xl text-gray-400 line-through">{formatMoney(product.originalPrice)}</span>}
+              </div>
+              
+              <div className="flex items-center gap-6 mb-8">
+                <span className="font-medium text-gray-700">Quantity:</span>
+                <div className="flex items-center gap-4">
+                  <button className="w-10 h-10 rounded-full border border-[#C9A57B] text-[#C9A57B] flex items-center justify-center hover:bg-[#C9A57B] hover:text-white transition-colors text-xl" onClick={() => setQty(Math.max(1, qty-1))}>-</button>
+                  <span className="text-xl font-bold w-6 text-center">{qty}</span>
+                  <button className="w-10 h-10 rounded-full border border-[#C9A57B] text-[#C9A57B] flex items-center justify-center hover:bg-[#C9A57B] hover:text-white transition-colors text-xl" onClick={() => setQty(qty+1)}>+</button>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                <button className="btn-primary flex-1 py-4 text-lg" onClick={() => addToCart(product, qty)}>Add to Cart</button>
+                <button className="btn-secondary flex-1 py-4 text-lg flex items-center justify-center gap-2" onClick={() => toggleWishlist(product.id)}>
+                  {inWishlist ? <Heart fill="#C9A57B" /> : <Heart />} {inWishlist ? 'Saved' : 'Add to Wishlist'}
+                </button>
+              </div>
+            </>
+          )}
+
+          <div className="border-t border-gray-200 pt-8">
+            <h4 className="font-bold text-lg mb-4">Delivery & Returns</h4>
+            <ul className="space-y-3 text-gray-600 list-disc pl-5">
+              <li>Delivery across Pakistan within 3-5 working days.</li>
+              <li>Free delivery on orders over PKR 5,000.</li>
+              <li>100% satisfaction guarantee. Contact us for replacements.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CartCheckoutView = ({ cart, updateCartQty, removeFromCart, discountCode, setDiscountCode, showToast, clearCart, setOrders }) => {
+  const [step, setStep] = useState('cart'); // cart | checkout
+  const [formData, setFormData] = useState({ fname: '', lname: '', phone: '', address: '', city: '', payment: 'cod' });
+  
+  const subtotal = cart.reduce((sum, item) => sum + ((item.options ? item.options.price : item.price) * item.quantity), 0);
+  const discountAmount = discountCode === 'WELCOME15' ? subtotal * 0.15 : 0;
+  const discountedSubtotal = subtotal - discountAmount;
+  const delivery = (discountedSubtotal >= 5000 || discountedSubtotal === 0) ? 0 : 300;
+  const total = discountedSubtotal + delivery;
+
+  const [promoInput, setPromoInput] = useState(discountCode || '');
+
+  const handleApplyPromo = () => {
+    const val = promoInput.toUpperCase().trim();
+    if (val === 'WELCOME15') {
+      setDiscountCode(val);
+      showToast('Voucher applied! 15% off.', 'success');
+    } else if (val === '') {
+      setDiscountCode(null);
+      showToast('Voucher removed.', 'success');
+    } else {
+      setDiscountCode(null);
+      showToast('Invalid voucher code.', 'error');
+    }
+  };
+
+  const handlePlaceOrder = (e) => {
+    e.preventDefault();
+    const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+    setOrders(prev => [...prev, {
+      id: orderId,
+      customer: { name: `${formData.fname} ${formData.lname}`, phone: formData.phone, address: formData.address, city: formData.city },
+      total,
+      status: 'Pending',
+      date: new Date().toLocaleDateString(),
+      items: [...cart]
+    }]);
+    clearCart();
+    setDiscountCode(null);
+    setStep('success');
+    window.scrollTo(0,0);
+  };
+
+  if (step === 'success') {
+    return (
+      <div className="max-w-[800px] mx-auto px-8 py-24 text-center animate-fade-in-view">
+        <div className="w-24 h-24 rounded-full border-4 border-[#7FA99B] flex items-center justify-center text-5xl text-[#7FA99B] mx-auto mb-8 animate-bounce">✓</div>
+        <h1 className="font-playfair text-5xl mb-4">Thank You!</h1>
+        <p className="text-xl text-gray-600 mb-2">Your order <strong className="text-black">has been placed successfully.</strong></p>
+        <p className="text-gray-500 mb-10">You will receive a confirmation message on WhatsApp shortly.</p>
+        <a href="#shop" className="btn-primary">Continue Shopping</a>
+      </div>
+    );
+  }
+
+  if (cart.length === 0) {
+    return (
+      <div className="max-w-[800px] mx-auto px-8 py-32 text-center animate-fade-in-view">
+        <div className="text-8xl opacity-30 mb-6">🛒</div>
+        <h1 className="font-playfair text-5xl mb-6">Your Cart is Empty</h1>
+        <p className="text-xl text-gray-500 mb-10">Add some beautiful artisanal creations to your cart.</p>
+        <a href="#shop" className="btn-primary">Start Shopping</a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-[1280px] mx-auto px-8 animate-fade-in-view pb-24">
+      <h1 className="font-playfair text-4xl mb-10">Secure Checkout</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 items-start">
+        
+        {/* Left Column */}
+        <div className="lg:col-span-3">
+          {step === 'cart' ? (
+            <>
+              <h2 className="font-playfair text-2xl mb-6">Your Items</h2>
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-8 space-y-6">
+                {cart.map(item => (
+                  <div key={item.cartId} className="flex gap-6 pb-6 border-b border-gray-100 last:border-0 last:pb-0">
+                    <img src={item.image} alt={item.name} className="w-24 h-24 object-cover rounded-xl" />
+                    <div className="flex-1">
+                      <div className="flex justify-between mb-1">
+                        <h4 className="font-bold text-lg">{item.name}</h4>
+                        <div className="font-bold text-[#C9A57B]">{formatMoney((item.options ? item.options.price : item.price) * item.quantity)}</div>
+                      </div>
+                      <div className="text-sm text-gray-500 mb-4">{item.category} {item.options && `(Custom: ${item.options.desc})`}</div>
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => updateCartQty(item.cartId, -1)} className="w-8 h-8 rounded-full border border-[#C9A57B] text-[#C9A57B] flex items-center justify-center hover:bg-[#C9A57B] hover:text-white">-</button>
+                          <span className="font-bold w-4 text-center">{item.quantity}</span>
+                          <button onClick={() => updateCartQty(item.cartId, 1)} className="w-8 h-8 rounded-full border border-[#C9A57B] text-[#C9A57B] flex items-center justify-center hover:bg-[#C9A57B] hover:text-white">+</button>
+                        </div>
+                        <button onClick={() => removeFromCart(item.cartId)} className="text-sm text-gray-400 hover:text-red-500 underline">Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="font-playfair text-2xl mb-6">Shipping Details</h2>
+              <form id="checkoutForm" onSubmit={handlePlaceOrder} className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-8">
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div><label className="block mb-2 font-medium">First Name *</label><input required className="input-field" value={formData.fname} onChange={e=>setFormData({...formData, fname: e.target.value})} /></div>
+                  <div><label className="block mb-2 font-medium">Last Name *</label><input required className="input-field" value={formData.lname} onChange={e=>setFormData({...formData, lname: e.target.value})} /></div>
+                </div>
+                <div className="mb-6"><label className="block mb-2 font-medium">Phone Number *</label><input type="tel" required placeholder="+92 300 1234567" className="input-field" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} /></div>
+                <div className="mb-6"><label className="block mb-2 font-medium">Delivery Address *</label><textarea required rows="3" className="input-field" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} /></div>
+                <div className="mb-8"><label className="block mb-2 font-medium">City *</label>
+                  <select required className="input-field" value={formData.city} onChange={e=>setFormData({...formData, city: e.target.value})}>
+                    <option value="">Select City</option><option>Karachi</option><option>Lahore</option><option>Islamabad</option><option>Rawalpindi</option><option>Other</option>
+                  </select>
+                </div>
+                
+                <h3 className="font-playfair text-xl mb-4">Payment Method</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <label className={`border rounded-xl p-4 cursor-pointer flex items-center gap-3 transition-colors ${formData.payment === 'cod' ? 'border-[#C9A57B] bg-[#C9A57B]/5' : 'border-gray-200'}`}>
+                    <input type="radio" checked={formData.payment === 'cod'} onChange={() => setFormData({...formData, payment: 'cod'})} className="accent-[#C9A57B]" /> 💵 Cash on Delivery
+                  </label>
+                  <label className={`border rounded-xl p-4 cursor-pointer flex items-center gap-3 transition-colors ${formData.payment === 'bank' ? 'border-[#C9A57B] bg-[#C9A57B]/5' : 'border-gray-200'}`}>
+                    <input type="radio" checked={formData.payment === 'bank'} onChange={() => setFormData({...formData, payment: 'bank'})} className="accent-[#C9A57B]" /> 🏦 Bank Transfer
+                  </label>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
+
+        {/* Right Column Summary */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-3xl p-8 shadow-md sticky top-[120px]">
+            <h2 className="font-playfair text-2xl mb-6">Order Summary</h2>
+            
+            {step === 'cart' && (
+              <div className="flex gap-2 mb-6 pb-6 border-b border-gray-100">
+                <input type="text" placeholder="Promo code" className="input-field py-3 px-4" value={promoInput} onChange={e=>setPromoInput(e.target.value)} />
+                <button className="btn-secondary px-6" onClick={handleApplyPromo}>Apply</button>
+              </div>
+            )}
+
+            <div className="space-y-4 text-gray-600 mb-6">
+              <div className="flex justify-between"><span>Subtotal</span><span>{formatMoney(subtotal)}</span></div>
+              {discountAmount > 0 && <div className="flex justify-between text-[#7FA99B]"><span>Discount ({discountCode})</span><span>-{formatMoney(discountAmount)}</span></div>}
+              <div className="flex justify-between"><span>Delivery</span><span>{delivery === 0 ? <span className="text-[#7FA99B]">FREE</span> : formatMoney(delivery)}</span></div>
+            </div>
+
+            <div className="flex justify-between items-center pt-6 border-t-2 border-[#C9A57B] mb-8">
+              <span className="text-xl font-bold text-[#C9A57B]">Total</span>
+              <span className="text-2xl font-bold text-[#C9A57B]">{formatMoney(total)}</span>
+            </div>
+
+            {step === 'cart' ? (
+              <>
+                <button className="btn-primary w-full py-4 text-lg" onClick={() => { setStep('checkout'); window.scrollTo(0,0); }}>Proceed to Checkout</button>
+                <div className="text-center mt-4"><a href="#shop" className="text-sm text-gray-500 underline hover:text-[#C9A57B]">Continue Shopping</a></div>
+              </>
+            ) : (
+              <>
+                <button type="submit" form="checkoutForm" className="btn-primary w-full py-4 text-lg">Place Order ({formatMoney(total)})</button>
+                <div className="text-center mt-4"><button onClick={() => { setStep('cart'); window.scrollTo(0,0); }} className="text-sm text-gray-500 underline hover:text-[#C9A57B]">&larr; Return to Cart</button></div>
+              </>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+const AdminView = ({ products, setProducts, categories, setCategories, orders, setOrders, adminLoggedIn, setAdminLoggedIn, adminTab, setAdminTab, showToast, openOrderModal, openAdminProductModal, closeAdminProductModal, isProductModalOpen }) => {
+  const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
+  const [catForm, setCatForm] = useState({ name: '', icon: '' });
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if(loginForm.user === 'admin' && loginForm.pass === 'castilla2026') {
+      setAdminLoggedIn(true);
+      showToast('Welcome Admin');
+    } else {
+      showToast('Invalid credentials', 'error');
+    }
+  };
+
+  if (!adminLoggedIn) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4 animate-fade-in-view">
+        <form onSubmit={handleLogin} className="bg-white p-10 rounded-3xl shadow-xl max-w-[400px] w-full text-center">
+          <h1 className="font-playfair text-3xl text-[#C9A57B] mb-2">Admin Portal</h1>
+          <p className="text-gray-500 mb-8">Enter credentials to manage Castilla.</p>
+          <input className="input-field mb-4" placeholder="Username" required value={loginForm.user} onChange={e=>setLoginForm({...loginForm, user: e.target.value})} />
+          <input className="input-field mb-6" type="password" placeholder="Password" required value={loginForm.pass} onChange={e=>setLoginForm({...loginForm, pass: e.target.value})} />
+          <button className="btn-primary w-full py-3">Login</button>
+          <p className="text-xs text-gray-400 mt-4">Hint: admin / castilla2026</p>
+        </form>
+      </div>
+    );
+  }
+
+  const totalRev = orders.filter(o => o.status !== 'Cancelled').reduce((sum, o) => sum + o.total, 0);
+
+  const getStatusColor = (s) => {
+    if(s === 'Pending') return 'bg-[#F39C12]';
+    if(s === 'Processing') return 'bg-[#3498DB]';
+    if(s === 'Shipped') return 'bg-[#9b59b6]';
+    if(s === 'Delivered') return 'bg-[#7FA99B]';
+    if(s === 'Cancelled') return 'bg-[#E74C3C]';
+    return 'bg-gray-500';
+  };
+
+  const handleAddCategory = (e) => {
+    e.preventDefault();
+    if(categories.find(c => c.name.toLowerCase() === catForm.name.toLowerCase())) {
+      showToast('Category already exists!', 'error');
+      return;
+    }
+    setCategories([...categories, { name: catForm.name, icon: catForm.icon }]);
+    setCatForm({ name: '', icon: '' });
+    showToast('Category added successfully!');
+  };
+
+  const deleteCategory = (name) => {
+    if(window.confirm(`Are you sure you want to delete "${name}"?`)) {
+      setCategories(categories.filter(c => c.name !== name));
+      showToast('Category deleted');
+    }
+  };
+
+  const deleteProduct = (id) => {
+    if(window.confirm('Delete this product?')) {
+      setProducts(products.filter(p => p.id !== id));
+      showToast('Product deleted');
+    }
+  };
+
+  return (
+    <div className="max-w-[1280px] mx-auto px-8 pb-24 animate-fade-in-view">
+      <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-8">
+        
+        {/* Sidebar */}
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 h-max sticky top-[120px]">
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-8">Castilla Admin</h2>
+          <ul className="space-y-2">
+            {[
+              { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+              { id: 'products', icon: '📦', label: 'Products' },
+              { id: 'categories', icon: '🗂️', label: 'Categories' },
+              { id: 'orders', icon: '📋', label: 'Orders' },
+            ].map(tab => (
+              <li key={tab.id} onClick={() => setAdminTab(tab.id)} className={`p-4 rounded-xl cursor-pointer font-medium transition-colors ${adminTab === tab.id ? 'bg-[#C9A57B]/10 text-[#C9A57B]' : 'hover:bg-gray-50 text-gray-600'}`}>
+                {tab.icon} {tab.label}
+              </li>
+            ))}
+            <li onClick={() => { setAdminLoggedIn(false); window.location.hash='#home'; showToast('Logged out'); }} className="p-4 mt-8 rounded-xl cursor-pointer font-medium text-red-500 hover:bg-red-50">
+              🚪 Logout
+            </li>
+          </ul>
+        </div>
+
+        {/* Content */}
+        <div>
+          {adminTab === 'dashboard' && (
+            <div className="animate-fade-in">
+              <h1 className="font-playfair text-4xl mb-8">Overview</h1>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+                <div className="bg-white rounded-3xl p-8 text-center shadow-sm border border-gray-100">
+                  <div className="text-4xl font-bold text-[#C9A57B] mb-2">{products.length}</div>
+                  <div className="text-gray-500 font-medium">Active Products</div>
+                </div>
+                <div className="bg-white rounded-3xl p-8 text-center shadow-sm border border-gray-100">
+                  <div className="text-4xl font-bold text-[#C9A57B] mb-2">{orders.length}</div>
+                  <div className="text-gray-500 font-medium">Total Orders</div>
+                </div>
+                <div className="bg-white rounded-3xl p-8 text-center shadow-sm border border-gray-100">
+                  <div className="text-2xl font-bold text-[#C9A57B] mb-2 pt-2">{formatMoney(totalRev)}</div>
+                  <div className="text-gray-500 font-medium">Net Revenue</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                <h3 className="font-playfair text-2xl mb-6">Recent Orders</h3>
+                {orders.length === 0 ? <p className="text-gray-500">No orders yet.</p> : (
+                  <table className="w-full text-left border-collapse">
+                    <thead><tr className="border-b border-gray-100"><th className="pb-4 font-medium text-gray-500">Order #</th><th className="pb-4 font-medium text-gray-500">Date</th><th className="pb-4 font-medium text-gray-500">Amount</th><th className="pb-4 font-medium text-gray-500">Status</th><th className="pb-4 font-medium text-gray-500">Action</th></tr></thead>
+                    <tbody>
+                      {orders.slice(-5).reverse().map(o => (
+                        <tr key={o.id} className="border-b border-gray-50 last:border-0">
+                          <td className="py-4 font-bold">{o.id}</td><td className="py-4 text-gray-600">{o.date}</td><td className="py-4 font-bold text-[#C9A57B]">{formatMoney(o.total)}</td>
+                          <td className="py-4"><span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${getStatusColor(o.status)}`}>{o.status}</span></td>
+                          <td className="py-4"><button className="text-sm font-bold text-[#C9A57B] hover:underline" onClick={() => openOrderModal(o.id)}>Manage</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminTab === 'products' && (
+            <div className="animate-fade-in">
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="font-playfair text-4xl">Products</h1>
+                <button className="btn-primary" onClick={() => openAdminProductModal(null)}>Add New Product</button>
+              </div>
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 overflow-x-auto">
+                <table className="w-full text-left min-w-[600px]">
+                  <thead><tr className="border-b border-gray-100"><th className="pb-4 text-gray-500 font-medium">Image</th><th className="pb-4 text-gray-500 font-medium">Name</th><th className="pb-4 text-gray-500 font-medium">Category</th><th className="pb-4 text-gray-500 font-medium">Price</th><th className="pb-4 text-gray-500 font-medium">Actions</th></tr></thead>
+                  <tbody>
+                    {products.map(p => (
+                      <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                        <td className="py-3"><img src={p.image} className="w-12 h-12 rounded-lg object-cover" alt="thumb" /></td>
+                        <td className="py-3 font-semibold">{p.name}</td>
+                        <td className="py-3 text-sm text-gray-500">{p.category}</td>
+                        <td className="py-3 font-bold text-[#C9A57B]">{p.price === 0 ? 'Dynamic' : formatMoney(p.price)}</td>
+                        <td className="py-3 flex gap-3">
+                          <button className="text-sm text-[#C9A57B] hover:underline" onClick={() => openAdminProductModal(p.id)}>Edit</button>
+                          <button className="text-sm text-red-500 hover:underline" onClick={() => deleteProduct(p.id)}>Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {adminTab === 'categories' && (
+            <div className="animate-fade-in">
+              <h1 className="font-playfair text-4xl mb-8">Categories</h1>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-1 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 h-max">
+                  <h3 className="font-playfair text-xl mb-6">Add Category</h3>
+                  <form onSubmit={handleAddCategory} className="space-y-4">
+                    <div><label className="block text-sm font-medium mb-2">Name</label><input required className="input-field" placeholder="e.g. Essential Oils" value={catForm.name} onChange={e=>setCatForm({...catForm, name: e.target.value})} /></div>
+                    <div><label className="block text-sm font-medium mb-2">Emoji Icon</label><input required className="input-field" placeholder="e.g. 🌿" value={catForm.icon} onChange={e=>setCatForm({...catForm, icon: e.target.value})} /></div>
+                    <button className="btn-primary w-full mt-2">Save</button>
+                  </form>
+                </div>
+                <div className="md:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                  <table className="w-full text-left">
+                    <thead><tr className="border-b border-gray-100"><th className="pb-4 text-gray-500 font-medium">Icon</th><th className="pb-4 text-gray-500 font-medium">Name</th><th className="pb-4 text-gray-500 font-medium">Items</th><th className="pb-4 text-gray-500 font-medium">Actions</th></tr></thead>
+                    <tbody>
+                      {categories.map(c => (
+                        <tr key={c.name} className="border-b border-gray-50 last:border-0">
+                          <td className="py-4 text-2xl">{c.icon}</td>
+                          <td className="py-4 font-semibold">{c.name}</td>
+                          <td className="py-4 text-sm text-gray-500">{products.filter(p=>p.category===c.name).length} items</td>
+                          <td className="py-4"><button className="text-sm text-red-500 hover:underline" onClick={() => deleteCategory(c.name)}>Delete</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {adminTab === 'orders' && (
+            <div className="animate-fade-in">
+              <h1 className="font-playfair text-4xl mb-8">All Orders</h1>
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 overflow-x-auto">
+                {orders.length === 0 ? <p className="text-gray-500">No orders yet.</p> : (
+                  <table className="w-full text-left min-w-[800px]">
+                    <thead><tr className="border-b border-gray-100"><th className="pb-4 font-medium text-gray-500">Order #</th><th className="pb-4 font-medium text-gray-500">Customer</th><th className="pb-4 font-medium text-gray-500">Date</th><th className="pb-4 font-medium text-gray-500">Items</th><th className="pb-4 font-medium text-gray-500">Total</th><th className="pb-4 font-medium text-gray-500">Status</th><th className="pb-4 font-medium text-gray-500">Action</th></tr></thead>
+                    <tbody>
+                      {[...orders].reverse().map(o => (
+                        <tr key={o.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
+                          <td className="py-4 font-bold">{o.id}</td>
+                          <td className="py-4 font-medium">{o.customer.name}</td>
+                          <td className="py-4 text-sm text-gray-500">{o.date}</td>
+                          <td className="py-4 text-sm text-gray-500">{o.items.length} items</td>
+                          <td className="py-4 font-bold text-[#C9A57B]">{formatMoney(o.total)}</td>
+                          <td className="py-4"><span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${getStatusColor(o.status)}`}>{o.status}</span></td>
+                          <td className="py-4"><button className="text-sm font-bold text-[#C9A57B] hover:underline" onClick={() => openOrderModal(o.id)}>Manage</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Embedded Product Form Modal */}
+      {isProductModalOpen && <AdminProductModal categories={categories} products={products} setProducts={setProducts} close={closeAdminProductModal} showToast={showToast} />}
+    </div>
+  );
+};
+
+// --- Modals ---
+const QuickViewModal = ({ product, close, addToCart }) => {
+  if (!product) return null;
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10002] flex items-center justify-center p-4 animate-fade-in" onClick={close}>
+      <div className="bg-white rounded-3xl w-full max-w-[900px] max-h-[90vh] overflow-y-auto relative animate-slide-up" onClick={e => e.stopPropagation()}>
+        <button onClick={close} className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10 hover:text-[#C9A57B]"><X size={20}/></button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 md:p-12">
+          <img src={product.image} alt={product.name} className="w-full h-[400px] object-cover rounded-2xl" />
+          <div className="flex flex-col justify-center">
+            <div className="text-sm font-bold tracking-widest text-[#C9A57B] uppercase mb-2">{product.category}</div>
+            <h2 className="font-playfair text-3xl mb-4">{product.name}</h2>
+            <p className="text-gray-600 mb-6 italic">{product.scentStory}</p>
+            <div className="text-3xl font-bold text-[#C9A57B] mb-8">{product.price === 0 ? 'Dynamic' : formatMoney(product.price)}</div>
+            <a href={`#product-${product.id}`} onClick={close} className="btn-primary w-full text-center py-4 mb-3">View Full Details</a>
+            {product.price > 0 && <button onClick={() => { addToCart(product, 1); close(); }} className="btn-secondary w-full py-4">Add to Cart Quickly</button>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const WishlistModal = ({ wishlistIds, products, close, toggleWishlist, addToCart }) => {
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10002] flex items-center justify-center p-4 animate-fade-in" onClick={close}>
+      <div className="bg-white rounded-3xl w-full max-w-[600px] max-h-[90vh] overflow-y-auto relative p-10 animate-slide-up" onClick={e => e.stopPropagation()}>
+        <button onClick={close} className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10 hover:text-[#C9A57B]"><X size={20}/></button>
+        <h2 className="font-playfair text-3xl text-center mb-8">Your Wishlist ❤️</h2>
+        
+        {wishlistIds.length === 0 ? (
+          <div className="text-center text-gray-400 py-10">Your wishlist is empty!</div>
+        ) : (
+          <div className="space-y-6">
+            {wishlistIds.map(id => {
+              const p = products.find(x => x.id === id);
+              if(!p) return null;
+              return (
+                <div key={id} className="flex items-center justify-between pb-6 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center gap-4">
+                    <img src={p.image} className="w-16 h-16 rounded-xl object-cover" alt={p.name} />
+                    <div>
+                      <div className="font-bold text-lg">{p.name}</div>
+                      <div className="text-[#C9A57B] font-semibold">{p.price === 0 ? 'Dynamic' : formatMoney(p.price)}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {p.price > 0 ? (
+                      <button className="btn-primary px-6 py-2 text-sm" onClick={() => addToCart(p)}>Add</button>
+                    ) : (
+                      <a href={`#product-${p.id}`} className="btn-primary px-6 py-2 text-sm" onClick={close}>Build</a>
+                    )}
+                    <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 transition-colors" onClick={() => toggleWishlist(id)}><X size={16}/></button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const OrderModal = ({ order, close, setOrders, showToast }) => {
+  if(!order) return null;
+
+  const updateStatus = (newStatus) => {
+    setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: newStatus } : o));
+    showToast(`Order ${order.id} updated to ${newStatus}`);
+    close();
+  };
+
+  const getStatusColor = (s) => {
+    if(s === 'Pending') return 'bg-[#F39C12]';
+    if(s === 'Processing') return 'bg-[#3498DB]';
+    if(s === 'Shipped') return 'bg-[#9b59b6]';
+    if(s === 'Delivered') return 'bg-[#7FA99B]';
+    if(s === 'Cancelled') return 'bg-[#E74C3C]';
+    return 'bg-gray-500';
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10002] flex items-center justify-center p-4 animate-fade-in" onClick={close}>
+      <div className="bg-white rounded-3xl w-full max-w-[650px] max-h-[90vh] overflow-y-auto relative p-10 animate-slide-up" onClick={e => e.stopPropagation()}>
+        <button onClick={close} className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10 hover:text-[#C9A57B]"><X size={20}/></button>
+        
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="font-playfair text-3xl">Order {order.id}</h2>
+          <span className={`px-4 py-1.5 rounded-full text-sm font-bold text-white ${getStatusColor(order.status)}`}>{order.status}</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 mb-8 bg-[#F9F7F4] p-6 rounded-2xl">
+          <div>
+            <h4 className="font-bold text-sm text-gray-400 mb-2 uppercase tracking-wider">Customer Details</h4>
+            <div className="font-semibold text-lg">{order.customer.name}</div>
+            <div className="text-gray-600">{order.customer.phone}</div>
+          </div>
+          <div>
+            <h4 className="font-bold text-sm text-gray-400 mb-2 uppercase tracking-wider">Shipping Address</h4>
+            <div className="text-gray-600">{order.customer.address}</div>
+            <div className="text-gray-600">{order.customer.city}</div>
+          </div>
+        </div>
+
+        <h4 className="font-bold text-xl mb-4">Order Items</h4>
+        <div className="space-y-4 mb-8">
+          {order.items.map((item, idx) => (
+            <div key={idx} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+              <div className="flex items-center gap-4">
+                <img src={item.image} className="w-12 h-12 rounded-lg object-cover" alt="item" />
+                <div>
+                  <div className="font-semibold">{item.name}</div>
+                  <div className="text-xs text-gray-500">Qty: {item.quantity} {item.options && `(${item.options.desc})`}</div>
+                </div>
+              </div>
+              <div className="font-bold text-[#C9A57B]">{formatMoney((item.options ? item.options.price : item.price) * item.quantity)}</div>
+            </div>
+          ))}
+          <div className="flex justify-between items-center pt-4 border-t-2 border-[#C9A57B] text-xl font-bold">
+            <span>Total Paid</span>
+            <span className="text-[#C9A57B]">{formatMoney(order.total)}</span>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-gray-100">
+          <h4 className="font-bold mb-4">Update Status</h4>
+          <div className="flex gap-4">
+            <select className="input-field flex-1" value={order.status} onChange={e => updateStatus(e.target.value)}>
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+const AdminProductModal = ({ categories, products, setProducts, close, showToast }) => {
+  // Using a local trick to find which product to edit if the window has a stored ID
+  // In a full refactor we would pass it down, but since we are replacing the global method:
+  const editId = window.adminEditId; // Hack to bridge state easily
+  const p = editId ? products.find(x => x.id === editId) : null;
+  
+  const [form, setForm] = useState({
+    name: p ? p.name : '',
+    category: p ? p.category : categories[0].name,
+    price: p ? p.price : '',
+    originalPrice: p && p.originalPrice ? p.originalPrice : '',
+    image: p ? p.image : '',
+    description: p ? p.description : '',
+    scentStory: p ? p.scentStory : '',
+    badge: p && p.badge ? p.badge : '',
+    burnTime: p && p.burnTime ? p.burnTime : '',
+    weight: p && p.weight ? p.weight : ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const prodData = {
+      id: p ? p.id : Date.now(),
+      name: form.name,
+      category: form.category,
+      price: parseInt(form.price) || 0,
+      originalPrice: parseInt(form.originalPrice) || null,
+      image: form.image,
+      description: form.description,
+      scentStory: form.scentStory || 'A beautifully crafted piece by Castilla.',
+      topNotes: p ? p.topNotes : 'N/A',
+      heartNotes: p ? p.heartNotes : 'N/A',
+      baseNotes: p ? p.baseNotes : 'N/A',
+      badge: form.badge || null,
+      burnTime: parseInt(form.burnTime) || null,
+      weight: parseInt(form.weight) || null
+    };
+
+    if (p) {
+      setProducts(products.map(x => x.id === p.id ? prodData : x));
+      showToast('Product updated successfully!');
+    } else {
+      setProducts([...products, prodData]);
+      showToast('Product created successfully!');
+    }
+    close();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10002] flex items-center justify-center p-4 animate-fade-in" onClick={close}>
+      <div className="bg-white rounded-3xl w-full max-w-[700px] max-h-[90vh] overflow-y-auto relative p-10 animate-slide-up" onClick={e => e.stopPropagation()}>
+        <button onClick={close} className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10 hover:text-[#C9A57B]"><X size={20}/></button>
+        <h2 className="font-playfair text-3xl mb-8">{p ? 'Edit Product' : 'Add New Product'}</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className="block mb-2 font-medium">Name *</label><input required className="input-field" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} /></div>
+            <div>
+              <label className="block mb-2 font-medium">Category *</label>
+              <select required className="input-field" value={form.category} onChange={e=>setForm({...form, category: e.target.value})}>
+                {categories.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+              </select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className="block mb-2 font-medium">Price (PKR) *</label><input type="number" required className="input-field" value={form.price} onChange={e=>setForm({...form, price: e.target.value})} /></div>
+            <div><label className="block mb-2 font-medium">Original Price</label><input type="number" className="input-field" value={form.originalPrice} onChange={e=>setForm({...form, originalPrice: e.target.value})} /></div>
+          </div>
+          
+          <div><label className="block mb-2 font-medium">Image URL *</label><input type="url" required className="input-field" value={form.image} onChange={e=>setForm({...form, image: e.target.value})} /></div>
+          
+          <div><label className="block mb-2 font-medium">Short Description *</label><input type="text" required className="input-field" value={form.description} onChange={e=>setForm({...form, description: e.target.value})} /></div>
+          
+          <div><label className="block mb-2 font-medium">Scent Story</label><textarea rows="2" className="input-field" value={form.scentStory} onChange={e=>setForm({...form, scentStory: e.target.value})} /></div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block mb-2 font-medium">Badge</label>
+              <select className="input-field" value={form.badge} onChange={e=>setForm({...form, badge: e.target.value})}>
+                <option value="">None</option>
+                <option value="New">New</option>
+                <option value="Bestseller">Bestseller</option>
+                <option value="Sale">Sale</option>
+                <option value="✨">✨</option>
+              </select>
+            </div>
+            <div><label className="block mb-2 font-medium">Burn Time (hrs)</label><input type="number" className="input-field" value={form.burnTime} onChange={e=>setForm({...form, burnTime: e.target.value})} /></div>
+            <div><label className="block mb-2 font-medium">Weight (g)</label><input type="number" className="input-field" value={form.weight} onChange={e=>setForm({...form, weight: e.target.value})} /></div>
+          </div>
+          
+          <button type="submit" className="btn-primary w-full py-4 text-lg mt-4">{p ? 'Update Product' : 'Create Product'}</button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+
+const ExitIntentModal = ({ close, showToast }) => {
+  const [email, setEmail] = useState('');
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[10002] flex items-center justify-center p-4 animate-fade-in" onClick={close}>
+      <div className="bg-white rounded-3xl w-full max-w-[500px] relative p-12 text-center animate-slide-up" onClick={e => e.stopPropagation()}>
+        <button onClick={close} className="absolute top-6 right-6 text-gray-400 hover:text-black"><X size={24}/></button>
+        <h3 className="font-playfair text-3xl mb-2">Wait! Don't Leave Empty-Handed</h3>
+        <div className="text-6xl font-bold text-[#C9A57B] my-6">15% OFF</div>
+        <p className="text-gray-500 mb-8 leading-relaxed">Subscribe to our newsletter and get 15% off your first order of luxury handcrafted items.</p>
+        <form onSubmit={e => { e.preventDefault(); showToast('Discount code WELCOME15 sent to your email! 🎉'); close(); }}>
+          <input type="email" required placeholder="Enter your email address" className="input-field text-center rounded-full mb-4" value={email} onChange={e=>setEmail(e.target.value)} />
+          <button type="submit" className="btn-primary w-full py-4 text-lg">Claim My Discount</button>
+        </form>
+        <p className="text-sm text-gray-400 mt-6">Use code: <strong className="text-black">WELCOME15</strong> at checkout</p>
+      </div>
+    </div>
+  );
+};
+
+
+// --- Content Pages ---
+const ShippingView = () => (
+  <div className="animate-fade-in-view container max-w-[800px] mx-auto px-8 py-24">
+    <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100">
+      <h1 className="font-playfair text-5xl mb-4 text-center">Shipping Policy</h1>
+      <p className="text-center text-gray-500 mb-12">Delivering luxury to your doorstep.</p>
+      
+      <div className="space-y-8 text-gray-600 leading-relaxed">
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Processing Time</h2>
+          <p>All Castilla candles and concrete trays are meticulously handcrafted. Please allow 1-3 business days for processing before your order is dispatched. Custom gift packs may require an additional 1-2 days for personalization.</p>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Delivery Timelines</h2>
+          <ul className="list-disc pl-5 space-y-2">
+            <li><strong>Karachi:</strong> 1-2 business days (Same-day delivery available for orders placed before 12 PM).</li>
+            <li><strong>Lahore, Islamabad & Major Cities:</strong> 2-4 business days.</li>
+            <li><strong>Rest of Pakistan:</strong> 3-5 business days.</li>
+          </ul>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Shipping Rates</h2>
+          <p>We are pleased to offer <strong>Free Shipping on all orders over PKR 5,000</strong> nationwide. For orders below this amount, a standard flat rate of PKR 300 applies.</p>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Tracking Your Order</h2>
+          <p>Once your order has been dispatched, you will receive a tracking link via email and WhatsApp. You can use this link to follow your artisanal package all the way to your door.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ReturnsView = () => (
+  <div className="animate-fade-in-view container max-w-[800px] mx-auto px-8 py-24">
+    <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100">
+      <h1 className="font-playfair text-5xl mb-4 text-center">Returns & Exchanges</h1>
+      <p className="text-center text-gray-500 mb-12">Your satisfaction is our priority.</p>
+      
+      <div className="space-y-8 text-gray-600 leading-relaxed">
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Our Guarantee</h2>
+          <p>At Castilla, we take immense pride in the quality and craftsmanship of our products. If your order arrives damaged, defective, or if you are not entirely satisfied with your purchase, we are here to help.</p>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Eligibility for Returns</h2>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Items must be returned within <strong>7 days</strong> of delivery.</li>
+            <li>Candles must be unlit and in their original, pristine condition.</li>
+            <li>Products must be in their original packaging.</li>
+            <li>Custom gift packs and personalized items are non-refundable unless damaged upon arrival.</li>
+          </ul>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">How to Initiate a Return</h2>
+          <p>To start a return or exchange, please contact our Customer Care team via WhatsApp at +92 300 1234567 or email us at hello@castilla.pk with your order number and photographs of the item (if damaged).</p>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Refund Process</h2>
+          <p>Once we receive and inspect the returned item, we will notify you of the approval or rejection of your refund. Approved refunds will be processed via Bank Transfer or your original method of payment within 5-7 business days.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const CandleCareView = () => (
+  <div className="animate-fade-in-view container max-w-[800px] mx-auto px-8 py-24">
+    <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100">
+      <h1 className="font-playfair text-5xl mb-4 text-center">Candle Care Guide</h1>
+      <p className="text-center text-gray-500 mb-12">The art of the perfect burn.</p>
+      
+      <div className="space-y-8 text-gray-600 leading-relaxed">
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">The First Burn is Crucial</h2>
+          <p>Candle wax has a "memory." The first time you light your Castilla candle, allow it to burn until the wax pool reaches the edges of the vessel (usually 2-3 hours). This prevents "tunneling" and ensures an even, beautiful burn for the life of the candle.</p>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Trim Your Wick</h2>
+          <p>Before every single burn, trim your wick to 1/4 inch. A trimmed wick prevents the flame from becoming too large, minimizes soot and smoke, and prolongs the lifespan of your candle.</p>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Safe Burning Practices</h2>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Never leave a burning candle unattended.</li>
+            <li>Keep candles out of reach of children and pets.</li>
+            <li>Place your candle on a stable, heat-resistant surface (like our Concrete Trays!).</li>
+            <li>Do not burn your candle for more than 4 hours at a time.</li>
+            <li>Stop burning when only 1/2 inch of wax remains at the bottom to prevent overheating the vessel.</li>
+          </ul>
+        </div>
+        <div>
+          <h2 className="font-playfair text-2xl text-[#C9A57B] mb-3">Extinguishing</h2>
+          <p>We recommend using a candle snuffer to gently extinguish the flame. Blowing out a candle can cause hot wax to splatter and generates excess smoke that disrupts the beautiful scent lingering in your room.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const FAQsView = () => (
+  <div className="animate-fade-in-view container max-w-[800px] mx-auto px-8 py-24">
+    <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100">
+      <h1 className="font-playfair text-5xl mb-4 text-center">FAQs</h1>
+      <p className="text-center text-gray-500 mb-12">Everything you need to know about Castilla.</p>
+      
+      <div className="space-y-8 text-gray-600 leading-relaxed">
+        <div>
+          <h2 className="font-bold text-xl text-[#2C2C2C] mb-2">What type of wax do you use?</h2>
+          <p>We exclusively use a premium, eco-friendly soy wax blend. It burns cleaner, slower, and longer than traditional paraffin wax, ensuring a healthier environment for your home.</p>
+        </div>
+        <div>
+          <h2 className="font-bold text-xl text-[#2C2C2C] mb-2">Are your fragrances safe?</h2>
+          <p>Absolutely. We use high-quality, phthalate-free fragrance oils infused with natural essential oils. They are carefully rigorously tested to provide a safe, luxurious scent throw.</p>
+        </div>
+        <div>
+          <h2 className="font-bold text-xl text-[#2C2C2C] mb-2">Do you take custom orders for weddings or corporate events?</h2>
+          <p>Yes, we do! Castilla specializes in bespoke party favors, wedding gifts, and corporate packages. Please email us at hello@castilla.pk to discuss your event requirements and bulk pricing.</p>
+        </div>
+        <div>
+          <h2 className="font-bold text-xl text-[#2C2C2C] mb-2">How do I clean my concrete tray?</h2>
+          <p>Our concrete trays are sealed to protect against light stains and water. To clean, simply wipe with a soft, damp cloth. Avoid using harsh chemicals or submerging them in water.</p>
+        </div>
+        <div>
+          <h2 className="font-bold text-xl text-[#2C2C2C] mb-2">Do you have a physical store?</h2>
+          <p>Currently, Castilla is an online-exclusive boutique. However, we occasionally participate in high-end artisan pop-ups across Karachi and Lahore. Follow us on Instagram @castilla.pk for updates!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+
+// ==========================================================================
+// 4. CSS STYLES (Tailwind supplements + Custom Keyframes & Overrides)
+// ==========================================================================
+const CustomStyles = () => (
+  <style dangerouslySetInnerHTML={{__html: `
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+    
+    html { scroll-behavior: smooth; }
+    
+    .font-playfair { font-family: 'Playfair Display', serif; }
+    body { font-family: 'Inter', sans-serif; }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #C9A57B, #8B6F47);
+      color: white;
+      padding: 0.875rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 4px 20px rgba(201, 165, 123, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #C9A57B;
+      padding: 0.875rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid #C9A57B;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-secondary:hover {
+      background: #C9A57B;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 20px rgba(201, 165, 123, 0.4);
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(201, 165, 123, 0.3);
+      border-radius: 12px;
+      background: #FFFFFF;
+      color: #2C2C2C;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: #C9A57B;
+      box-shadow: 0 0 0 3px rgba(201, 165, 123, 0.1);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #C9A57B;
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-view {
+      animation: fadeInView 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes pulseGlow { to { transform: scale(1.2); opacity: 0.8; } }
+    .animate-pulse-glow { animation: pulseGlow 3s infinite alternate; }
+
+    @keyframes letterReveal { to { opacity: 1; transform: translateY(0); } }
+    .animate-letter-reveal { animation: letterReveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+    @keyframes textGlow { to { text-shadow: 0 4px 20px rgba(201, 165, 123, 0.4); } }
+    .animate-text-glow { animation: textGlow 1.5s ease-in-out forwards; animation-delay: 1.2s;}
+
+    @keyframes dotPulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.3); opacity: 1; } }
+    .animate-dot-pulse { animation: dotPulse 1.5s infinite; }
+
+    @keyframes fadeOutUp { to { opacity: 0; transform: translateY(-30px); visibility: hidden; } }
+    .animate-screen-exit { animation: fadeOutUp 0.6s ease-in-out forwards; animation-delay: 2s; }
+
+    @keyframes candleFlicker {
+      0%, 100% { opacity: 0.85; }
+      50% { opacity: 1; }
+      25%, 75% { opacity: 0.95; }
+    }
+    .animate-candle-flicker { animation: candleFlicker 4s infinite alternate; }
+
+    @keyframes floatOrb {
+      0% { transform: translateY(0) scale(1) translateX(0); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.8; }
+      100% { transform: translateY(-400px) scale(2) translateX(30px); opacity: 0; }
+    }
+    .animate-float-orb { animation: floatOrb linear infinite; }
+
+    @keyframes scrollCarousel {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .carousel-track { animation: scrollCarousel 30s linear infinite; }
+    .carousel-track:hover { animation-play-state: paused; }
+
+    .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+    .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    .animate-slide-in { animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px) } to { opacity: 1; transform: translateY(0) } }
+    @keyframes slideIn { from { transform: translateX(120%) } to { transform: translateX(0) } }
+  `}} />
+);
